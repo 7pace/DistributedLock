@@ -16,10 +16,10 @@ namespace Medallion.Threading.SqlServer
         private readonly IDbDistributedLock _internalLock;
 
         /// <summary>
-        /// Constructs a new lock using the provided <paramref name="name"/>. 
-        /// 
+        /// Constructs a new lock using the provided <paramref name="name"/>.
+        ///
         /// The provided <paramref name="connectionString"/> will be used to connect to the database.
-        /// 
+        ///
         /// Unless <paramref name="exactName"/> is specified, <paramref name="name"/> will be escaped/hashed to ensure name validity.
         /// </summary>
         public SqlDistributedLock(string name, string connectionString, Action<SqlConnectionOptionsBuilder>? options = null, bool exactName = false)
@@ -29,10 +29,10 @@ namespace Medallion.Threading.SqlServer
 
         /// <summary>
         /// Constructs a new lock using the provided <paramref name="name"/>.
-        /// 
+        ///
         /// The provided <paramref name="connection"/> will be used to connect to the database and will provide lock scope. It is assumed to be externally managed and
         /// will not be opened or closed.
-        /// 
+        ///
         /// Unless <paramref name="exactName"/> is specified, <paramref name="name"/> will be escaped/hashed to ensure name validity.
         /// </summary>
         public SqlDistributedLock(string name, IDbConnection connection, bool exactName = false)
@@ -42,10 +42,10 @@ namespace Medallion.Threading.SqlServer
 
         /// <summary>
         /// Constructs a new lock using the provided <paramref name="name"/>.
-        /// 
+        ///
         /// The provided <paramref name="transaction"/> will be used to connect to the database and will provide lock scope. It is assumed to be externally managed and
         /// will not be committed or rolled back.
-        /// 
+        ///
         /// Unless <paramref name="exactName"/> is specified, <paramref name="name"/> will be escaped/hashed to ensure name validity.
         /// </summary>
         public SqlDistributedLock(string name, IDbTransaction transaction, bool exactName = false)
@@ -89,14 +89,14 @@ namespace Medallion.Threading.SqlServer
         {
             if (connectionString == null) { throw new ArgumentNullException(nameof(connectionString)); }
 
-            var (keepaliveCadence, useTransaction, useMultiplexing) = SqlConnectionOptionsBuilder.GetOptions(optionsBuilder);
+            var (keepaliveCadence, useTransaction, useMultiplexing, accessToken) = SqlConnectionOptionsBuilder.GetOptions(optionsBuilder);
 
             if (useMultiplexing)
             {
                 return new OptimisticConnectionMultiplexingDbDistributedLock(name, connectionString, SqlMultiplexedConnectionLockPool.Instance, keepaliveCadence);
             }
 
-            return new DedicatedConnectionOrTransactionDbDistributedLock(name, () => new SqlDatabaseConnection(connectionString), useTransaction: useTransaction, keepaliveCadence);
+            return new DedicatedConnectionOrTransactionDbDistributedLock(name, () => accessToken == null ? new SqlDatabaseConnection(connectionString) : new SqlDatabaseConnection(connectionString, accessToken), useTransaction: useTransaction, keepaliveCadence);
         }
 
         internal static IDbDistributedLock CreateInternalLock(string name, IDbConnection connection)

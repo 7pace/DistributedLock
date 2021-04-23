@@ -28,6 +28,11 @@ namespace Medallion.Threading.SqlServer
         {
         }
 
+        public SqlDatabaseConnection(string connectionString, string accessToken)
+            : this(new SqlConnection(connectionString) { AccessToken = accessToken }, isExternallyOwned: false)
+        {
+        }
+
         // SQLServer gets no benefit from this
         public override bool ShouldPrepareCommands => false;
 
