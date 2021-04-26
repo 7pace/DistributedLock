@@ -10,19 +10,22 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.0.4</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <Authors>Michael Adelson</Authors>
     <Description>Core interfaces and utilities that support the DistributedLock.* family of packages</Description>
     <Copyright>Copyright © 2020 Michael Adelson</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>distributed lock async mutex reader writer semaphore</PackageTags>
-    <PackageProjectUrl>https://github.com/madelson/DistributedLock</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/madelson/DistributedLock</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/7pace/DistributedLock</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/7pace/DistributedLock</RepositoryUrl>
     <FileVersion>1.0.0.0</FileVersion>
     <PackageReleaseNotes>See https://github.com/madelson/DistributedLock#release-notes</PackageReleaseNotes>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\DistributedLock.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>DistributedLock.Core</AssemblyName>
+    <PackageId>7pace.DistributedLock.Core</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -49,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <Import Project="..\CopyPackageToPublishDirectory.targets" />

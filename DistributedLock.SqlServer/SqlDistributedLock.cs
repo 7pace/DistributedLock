@@ -93,7 +93,7 @@ namespace Medallion.Threading.SqlServer
 
             if (useMultiplexing)
             {
-                return new OptimisticConnectionMultiplexingDbDistributedLock(name, connectionString, SqlMultiplexedConnectionLockPool.Instance, keepaliveCadence);
+                return new OptimisticConnectionMultiplexingDbDistributedLock(name, connectionString, SqlMultiplexedConnectionLockPool.Instance, keepaliveCadence, accessToken);
             }
 
             return new DedicatedConnectionOrTransactionDbDistributedLock(name, () => accessToken == null ? new SqlDatabaseConnection(connectionString) : new SqlDatabaseConnection(connectionString, accessToken), useTransaction: useTransaction, keepaliveCadence);

@@ -1,8 +1,6 @@
 ﻿using Medallion.Threading.Internal;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading;
 
 namespace Medallion.Threading.SqlServer
@@ -75,6 +73,11 @@ namespace Medallion.Threading.SqlServer
             return this;
         }
 
+        /// <summary>
+        /// USe Access token
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
         public SqlConnectionOptionsBuilder UseAccessToken(string? accessToken)
         {
             this._accessToken = accessToken;
