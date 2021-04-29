@@ -13,9 +13,10 @@ namespace Medallion.Threading.Internal.Data
     /// Implements a pool of <see cref="MultiplexedConnectionLock"/> instances
     /// </summary>
 #if DEBUG
+
     public
 #else
-    internal 
+    internal
 #endif
         sealed class MultiplexedConnectionLockPool
     {
@@ -23,22 +24,24 @@ namespace Medallion.Threading.Internal.Data
 
         private readonly Dictionary<string, Queue<MultiplexedConnectionLock>> _poolsByConnectionString =
             new Dictionary<string, Queue<MultiplexedConnectionLock>>();
+
         /// <summary>
         /// The number of times we've called <see cref="StoreOrDisposeLockAsync(string, MultiplexedConnectionLock, bool)"/>
         /// since we last called <see cref="PrunePoolsNoLockAsync"/>
         /// </summary>
         private uint _storeCountSinceLastPrune;
+
         /// <summary>
         /// The number of <see cref="MultiplexedConnectionLock"/>s stored in <see cref="_poolsByConnectionString"/>
         /// </summary>
         private uint _pooledLockCount;
 
-        public MultiplexedConnectionLockPool(Func<string, DatabaseConnection> connectionFactory) 
+        public MultiplexedConnectionLockPool(Func<string, string?, DatabaseConnection> connectionFactory)
         {
             this.ConnectionFactory = connectionFactory;
         }
 
-        internal Func<string, DatabaseConnection> ConnectionFactory { get; }
+        internal Func<string, string?, DatabaseConnection> ConnectionFactory { get; }
 
         public async ValueTask<IDistributedSynchronizationHandle?> TryAcquireAsync<TLockCookie>(
             string connectionString,
@@ -46,7 +49,8 @@ namespace Medallion.Threading.Internal.Data
             TimeoutValue timeout,
             IDbSynchronizationStrategy<TLockCookie> strategy,
             TimeoutValue keepaliveCadence,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            string? accessToken)
             where TLockCookie : class
         {
             // opportunistic phase: see if we can use a connection that is already holding a lock
@@ -66,12 +70,15 @@ namespace Medallion.Threading.Internal.Data
                     {
                         case MultiplexedConnectionLockRetry.NoRetry:
                             return null;
+
                         case MultiplexedConnectionLockRetry.RetryOnThisLock:
                             var retryOnThisLockResult = await TryAcquireAsync(existingLock, opportunistic: false).ConfigureAwait(false);
                             canSafelyDisposeExistingLock = retryOnThisLockResult.CanSafelyDispose;
                             return retryOnThisLockResult.Handle;
+
                         case MultiplexedConnectionLockRetry.Retry:
                             break;
+
                         default:
                             throw new InvalidOperationException("unexpected retry");
                     }
@@ -84,7 +91,7 @@ namespace Medallion.Threading.Internal.Data
             }
 
             // normal phase: if we were not able to be opportunistic, ensure that we have a lock
-            var @lock = new MultiplexedConnectionLock(this.ConnectionFactory(connectionString));
+            var @lock = new MultiplexedConnectionLock(this.ConnectionFactory(connectionString, accessToken));
             MultiplexedConnectionLock.Result? result = null;
             try
             {
@@ -129,7 +136,7 @@ namespace Medallion.Threading.Internal.Data
                 if (shouldDispose)
                 {
                     // If we're about to dispose the lock, check if it has an empty pool that can be removed from our dictionary.
-                    // By itself this doesn't guarantee cleanup: after a successful acquire we'll have an empty lock left over that won't 
+                    // By itself this doesn't guarantee cleanup: after a successful acquire we'll have an empty lock left over that won't
                     // go away unless we use THAT connection string again. To help with this, we have pruning
                     if (this._poolsByConnectionString.TryGetValue(connectionString, out var pool) && pool.Count == 0)
                     {
@@ -176,7 +183,7 @@ namespace Medallion.Threading.Internal.Data
         {
             this._storeCountSinceLastPrune = 0; // reset
 
-            List<string>? connectionStringsToRemove = null; 
+            List<string>? connectionStringsToRemove = null;
             foreach (var kvp in this._poolsByConnectionString)
             {
                 var pool = kvp.Value;

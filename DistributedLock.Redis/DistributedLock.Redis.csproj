@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <Authors>Michael Adelson</Authors>
     <Description>Provides distributed locking primitives based on Redis</Description>
@@ -23,6 +23,9 @@
     <PackageReleaseNotes>See https://github.com/madelson/DistributedLock#release-notes</PackageReleaseNotes>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\DistributedLock.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>DistributedLock.Redis</AssemblyName>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>7pace.DistributedLock.Redis</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -49,7 +52,7 @@
     <PackageReference Include="Nullable" Version="1.2.1" Condition="'$(TargetFramework)' != 'netstandard2.1'">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <Import Project="..\CopyPackageToPublishDirectory.targets" />
